@@ -80,17 +80,9 @@ class Hpmsm < Oxidized::Model
     cfg
   end
 
-  cfg :telnet do
-    username /Username:/
-    password /Password:/
-  end
-
-  cfg :telnet, :ssh do
+  cfg :ssh do
     post_login "enable"
     pre_logout "quit"
-  end
-
-  cfg :ssh do
     pty_options(chars_wide: 1000)
   end
 end
