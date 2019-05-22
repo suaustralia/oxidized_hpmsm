@@ -1,4 +1,4 @@
-class Hpmsm < Oxidized::Model
+class HPMSM < Oxidized::Model
   prompt /^CLI[>#] +$/
 
   comment '! '
@@ -31,7 +31,7 @@ class Hpmsm < Oxidized::Model
 
   cmd 'show system info' do |cfg|
     sysinfo = ''
-    ram = cfg.match(/Total RAM:\s+(\S+)/)[1].to_i()/1024/1024
+    ram = cfg.match(/Total RAM:\s+(\S+)/)[1].to_i / 1024 / 1024
     sysinfo << "Memory: #{ram}M\n"
 
     serial = cfg.match(/Serial Number:\s+(\S+)/)[1]
@@ -67,16 +67,12 @@ class Hpmsm < Oxidized::Model
     comment cfg
   end
 
-  # not supported on all models
-  cmd 'show system information' do |cfg|
-    cfg = cfg.each_line.reject { |line| line.match /(.*CPU.*)|(.*Up Time.*)|(.*Total.*)|(.*Free.*)|(.*Lowest.*)|(.*Missed.*)/ }
-    cfg = cfg.join
-    comment cfg
-  end
-
   cmd 'show all config' do |cfg|
-    cfg = cfg.each_line.reject { |line| line.match /(^running configuration:)|(^#\s+Who:)|(^#\s+When:)|(^[ \t]*igmp proxy (upstream|downstream).*)/ }
-    cfg = cfg.join
+    cfg = cfg.each_line.reject { |line| line.match /^running configuration:/ }.join
+    # The who line contains SSH source port number, and the When line contains the timestamp of the run
+    cfg = cfg.each_line.reject { |line| line.match /(^#\s+Who:)|(^#\s+When:)/ }.join
+    # igmp proxy line keeps changing with weird characters every run, filter it out
+    cfg = cfg.each_line.reject { |line| line.match /^[ \t]*igmp proxy (upstream|downstream)/ }.join
     cfg
   end
 
